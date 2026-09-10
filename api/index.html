@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tạo figure từ ảnh của bạn</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#20242A;
+    --paper:#F5F1E9;
+    --panel:#FFFFFF;
+    --pine:#1F5C4E;
+    --pine-dark:#153F35;
+    --marigold:#F2A93B;
+    --blush:#F0C9CE;
+    --line:#DDD5C4;
+    --muted:#75726A;
+    --radius:18px;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:'Inter',sans-serif;}
+  h1,h2,h3,.display{font-family:'Space Grotesk',sans-serif;}
+
+  /* Top bar */
+  .topbar{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:18px 36px;border-bottom:1px solid var(--line);
+    background:var(--paper);
+  }
+  .brand{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:20px;letter-spacing:-0.02em;display:flex;align-items:center;gap:8px;}
+  .brand .dot{width:10px;height:10px;border-radius:50%;background:var(--marigold);display:inline-block;}
+  .topnav{display:flex;gap:28px;font-size:14px;color:var(--muted);}
+  .cart-pill{border:1px solid var(--ink);border-radius:999px;padding:8px 16px;font-size:13px;font-weight:600;}
+
+  /* Layout */
+  .wrap{max-width:1180px;margin:0 auto;padding:40px 36px 120px;}
+  .grid{display:grid;grid-template-columns:1.05fr 1fr;gap:56px;}
+  @media (max-width:900px){.grid{grid-template-columns:1fr;}}
+
+  /* Gallery */
+  .gallery-main{
+    aspect-ratio:1/1;border-radius:24px;overflow:hidden;
+    background:linear-gradient(160deg,#F0C9CE 0%, #F5DCC2 55%, #CFE3D6 100%);
+    display:flex;align-items:center;justify-content:center;position:relative;
+    border:1px solid var(--line);
+  }
+  .gallery-main svg{width:62%;height:62%;}
+  .gallery-thumbs{display:flex;gap:10px;margin-top:14px;}
+  .thumb{
+    width:64px;height:64px;border-radius:12px;border:2px solid transparent;
+    background:var(--panel);cursor:pointer;overflow:hidden;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .thumb.active{border-color:var(--pine);}
+  .thumb svg{width:70%;height:70%;}
+
+  /* Right panel */
+  .kicker{font-size:13px;color:var(--pine);font-weight:600;letter-spacing:0.02em;}
+  .title{font-size:30px;font-weight:600;line-height:1.15;margin:6px 0 4px;letter-spacing:-0.01em;}
+  .price{font-size:20px;font-weight:600;color:var(--ink);margin-bottom:22px;}
+  .price span{color:var(--muted);font-weight:400;font-size:14px;margin-left:6px;}
+
+  .field-label{font-size:13px;font-weight:600;margin:22px 0 10px;display:flex;align-items:center;justify-content:space-between;}
+  .field-label .val{font-weight:400;color:var(--muted);}
+
+  .type-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;}
+  @media (max-width:520px){.type-grid{grid-template-columns:repeat(3,1fr);}}
+  .type-card{
+    border:1.5px solid var(--line);border-radius:14px;padding:10px 6px 8px;
+    text-align:center;cursor:pointer;background:var(--panel);transition:border-color .15s, transform .1s;
+  }
+  .type-card:hover{transform:translateY(-2px);}
+  .type-card.active{border-color:var(--pine);box-shadow:0 0 0 1px var(--pine) inset;}
+  .type-card svg{width:30px;height:30px;margin-bottom:6px;}
+  .type-card .lbl{font-size:11px;color:var(--muted);line-height:1.2;}
+  .type-card.active .lbl{color:var(--ink);font-weight:600;}
+
+  .pill-row{display:flex;gap:10px;flex-wrap:wrap;}
+  .pill{
+    border:1.5px solid var(--line);border-radius:999px;padding:9px 16px;font-size:13px;
+    cursor:pointer;background:var(--panel);color:var(--ink);
+  }
+  .pill.active{background:var(--pine);border-color:var(--pine);color:#fff;font-weight:600;}
+
+  .style-row{display:flex;gap:12px;}
+  .style-card{flex:1;border:1.5px solid var(--line);border-radius:14px;padding:8px;cursor:pointer;background:var(--panel);text-align:center;}
+  .style-card.active{border-color:var(--pine);box-shadow:0 0 0 1px var(--pine) inset;}
+  .style-swatch{border-radius:10px;aspect-ratio:1/1;margin-bottom:8px;display:flex;align-items:center;justify-content:center;overflow:hidden;}
+  .style-swatch.chibi{background:linear-gradient(160deg,#F0C9CE,#F5DCC2);}
+  .style-swatch.ghibli{background:linear-gradient(160deg,#CFE3D6,#E8EFD8);}
+  .style-swatch.pixar{background:linear-gradient(160deg,#D8DEF2,#F0E4C9);}
+  .style-swatch svg{width:60%;height:60%;}
+  .style-name{font-size:12.5px;font-weight:600;}
+
+  /* Upload box */
+  .upload-box{
+    position:relative;overflow:hidden;border:1.5px dashed var(--line);border-radius:14px;
+    cursor:pointer;background:var(--panel);padding:16px;
+  }
+  .upload-box:hover{border-color:var(--pine);}
+  .upload-content{
+    display:flex;align-items:center;gap:14px;min-height:76px;
+  }
+  .upload-preview{
+    width:120px;height:120px;display:none;overflow:hidden;
+    border:1.5px solid #A020F0;border-radius:7px;background:#fff;
+  }
+  .upload-preview img{width:100%;height:100%;object-fit:contain;display:block;}
+  .upload-box.has-image .upload-preview{display:block;}
+  .upload-box.has-image .upload-content{display:none;}
+  .upload-contact{
+    display:none;font-size:11.5px;color:var(--muted);line-height:1.45;
+    margin-top:28px;
+  }
+  .upload-contact a{color:var(--pine);font-weight:600;text-decoration:underline;}
+  .upload-box.has-image .upload-contact{display:block;}
+  .upload-icon{
+    width:42px;height:42px;border-radius:10px;background:var(--paper);
+    display:flex;align-items:center;justify-content:center;flex-shrink:0;
+    position:relative;z-index:2;
+  }
+  .upload-text{position:relative;z-index:2;}
+  .upload-text .t1{font-size:13.5px;font-weight:600;}
+  .upload-text .t2{font-size:12px;color:var(--muted);margin-top:2px;}
+  .upload-box.has-file .upload-text .t1{color:var(--pine);}
+
+  .generate-btn{
+    margin-top:18px;width:100%;padding:14px;border-radius:12px;border:none;
+    background:var(--ink);color:#fff;font-weight:600;font-size:14.5px;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;gap:8px;
+  }
+  .generate-btn:disabled{opacity:0.45;cursor:not-allowed;}
+  .generate-btn:not(:disabled):hover{background:var(--pine-dark);}
+
+  .note{font-size:12px;color:var(--muted);margin-top:10px;line-height:1.5;}
+
+  .buy-row{display:flex;gap:12px;margin-top:26px;}
+  .add-cart{
+    flex:1;padding:15px;border-radius:12px;border:1.5px solid var(--ink);background:transparent;
+    font-weight:600;font-size:14px;cursor:pointer;
+  }
+  .buy-now{
+    flex:1;padding:15px;border-radius:12px;border:none;background:var(--marigold);
+    font-weight:600;font-size:14px;cursor:pointer;color:var(--pine-dark);
+  }
+  .add-cart:disabled,.buy-now:disabled{opacity:0.4;cursor:not-allowed;}
+
+  /* Modal base */
+  .overlay{
+    position:fixed;inset:0;background:rgba(32,36,42,0.55);
+    display:none;align-items:center;justify-content:center;z-index:100;padding:20px;
+  }
+  .overlay.show{display:flex;}
+  .modal{
+    background:var(--panel);border-radius:22px;width:100%;max-width:420px;
+    padding:30px 28px 26px;position:relative;
+  }
+  .modal-close{
+    position:absolute;top:16px;right:16px;width:30px;height:30px;border-radius:50%;
+    border:1px solid var(--line);background:var(--panel);cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+  }
+
+  /* Progress modal */
+  .progress-icon{
+    width:88px;height:88px;margin:6px auto 18px;border-radius:50%;
+    background:linear-gradient(160deg,#F0C9CE,#F5DCC2);
+    display:flex;align-items:center;justify-content:center;
+  }
+  .spin{animation:spin 1.6s linear infinite;transform-origin:center;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .progress-title{text-align:center;font-size:18px;font-weight:600;margin-bottom:6px;}
+  .progress-status{text-align:center;font-size:13px;color:var(--muted);margin-bottom:20px;min-height:18px;}
+  .bar-track{height:8px;border-radius:999px;background:var(--paper);overflow:hidden;}
+  .bar-fill{height:100%;width:0%;background:var(--pine);border-radius:999px;transition:width .3s ease;}
+  .progress-pct{text-align:center;font-size:12px;color:var(--muted);margin-top:8px;}
+
+  /* Confirm modal */
+  .confirm-title{font-size:17px;font-weight:600;margin-bottom:2px;}
+  .confirm-sub{font-size:12.5px;color:var(--muted);margin-bottom:16px;}
+  .confirm-preview{
+    aspect-ratio:1/1;border-radius:16px;overflow:hidden;
+    background:linear-gradient(160deg,#F0C9CE,#F5DCC2);
+    display:flex;align-items:center;justify-content:center;margin-bottom:12px;
+  }
+  .confirm-preview svg{width:58%;height:58%;}
+  .confirm-preview img{width:100%;height:100%;object-fit:contain;display:block;}
+  .history-row{display:flex;gap:8px;margin-bottom:20px;}
+  .history-thumb{
+    width:48px;height:48px;border-radius:10px;border:2px solid transparent;
+    background:var(--paper);cursor:pointer;display:flex;align-items:center;justify-content:center;
+  }
+  .history-thumb.active{border-color:var(--pine);}
+  .history-thumb svg{width:70%;height:70%;}
+  .confirm-actions{display:flex;gap:10px;}
+  .btn-regen{flex:1;padding:13px;border-radius:11px;border:1.5px solid var(--ink);background:transparent;font-weight:600;font-size:13.5px;cursor:pointer;}
+  .btn-confirm{flex:1;padding:13px;border-radius:11px;border:none;background:var(--ink);color:#fff;font-weight:600;font-size:13.5px;cursor:pointer;}
+  .btn-confirm:hover{background:var(--pine-dark);}
+
+  .toast{
+    position:fixed;bottom:26px;left:50%;transform:translateX(-50%) translateY(20px);
+    background:var(--ink);color:#fff;padding:12px 20px;border-radius:999px;font-size:13.5px;
+    opacity:0;transition:opacity .25s, transform .25s;pointer-events:none;z-index:200;
+    display:flex;align-items:center;gap:8px;
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand"><span class="dot"></span>FigureLab</div>
+  <div class="topnav">
+    <span>Danh mục</span><span>Cách hoạt động</span><span>Đánh giá</span>
+  </div>
+  <div class="cart-pill">Giỏ hàng (0)</div>
+</div>
+
+<div class="wrap">
+  <div class="grid">
+    <!-- Gallery -->
+    <div>
+      <div class="gallery-main" id="galleryMain"></div>
+      <div class="gallery-thumbs" id="galleryThumbs"></div>
+    </div>
+
+    <!-- Options -->
+    <div>
+      <div class="kicker">FIGURE THEO ẢNH CỦA BẠN</div>
+      <div class="title">Custom Photo Figure</div>
+      <div class="price">399.000₫ <span>đã bao gồm preview AI + hộp quà</span></div>
+
+      <div class="field-label">Loại figure <span class="val" id="typeVal">1 Người</span></div>
+      <div class="type-grid" id="typeGrid"></div>
+
+      <div class="field-label">Kích thước <span class="val" id="sizeVal">6cm</span></div>
+      <div class="pill-row" id="sizeRow"></div>
+
+      <div class="field-label">Phong cách <span class="val" id="styleVal">Chibi</span></div>
+      <div class="style-row" id="styleRow"></div>
+
+      <div class="field-label" style="margin-top:24px;">Tải ảnh lên</div>
+      <div class="upload-box" id="uploadBox" role="button" tabindex="0" aria-label="Tải ảnh lên">
+        <input id="photoInput" type="file" accept="image/png,image/jpeg,image/webp,image/jpg" hidden>
+        <div class="upload-preview">
+          <img id="uploadPreviewImg" alt="Preview ảnh đã upload">
+        </div>
+        <div class="upload-content">
+          <div class="upload-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 4v12M6 10l6-6 6 6M5 20h14" stroke="#1F5C4E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="upload-text">
+            <div class="t1" id="uploadT1">Chọn ảnh chân dung rõ mặt</div>
+            <div class="t2" id="uploadT2">JPG, PNG, WEBP — tối đa 10MB</div>
+          </div>
+        </div>
+        <div class="upload-contact">Cần chỉnh lại preview hoặc dùng ảnh cụ thể? Liên hệ đội ngũ qua <a href="mailto:hello@figurelab.vn" onclick="event.stopPropagation()">Email</a> hoặc <a href="https://wa.me/84000000000" target="_blank" rel="noreferrer" onclick="event.stopPropagation()">WhatsApp</a></div>
+      </div>
+
+      <button class="generate-btn" id="generateBtn" disabled>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 2l2.2 6.8H21l-5.6 4.1 2.2 6.8L12 15.6l-5.6 4.1 2.2-6.8L3 8.8h6.8L12 2z" fill="#F2A93B"/></svg>
+        Xem trước bằng AI
+      </button>
+      <div class="note">Bạn có thể xem trước figure trước khi thêm vào giỏ. Việc tạo preview không phát sinh thêm phí.</div>
+
+      <div class="buy-row">
+        <button class="add-cart" id="addCartBtn" disabled>Thêm vào giỏ</button>
+        <button class="buy-now" id="buyNowBtn" disabled>Mua ngay</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Progress modal -->
+<div class="overlay" id="progressOverlay">
+  <div class="modal">
+    <div class="progress-icon">
+      <svg class="spin" width="40" height="40" viewBox="0 0 24 24" fill="none"><path d="M12 3a9 9 0 1 0 9 9" stroke="#1F5C4E" stroke-width="2.4" stroke-linecap="round"/></svg>
+    </div>
+    <div class="progress-title">Đang tạo figure của bạn</div>
+    <div class="progress-status" id="progressStatus">Đang đọc ảnh…</div>
+    <div class="bar-track"><div class="bar-fill" id="barFill"></div></div>
+    <div class="progress-pct" id="barPct">0%</div>
+  </div>
+</div>
+
+<!-- Confirm modal -->
+<div class="overlay" id="confirmOverlay">
+  <div class="modal">
+    <button class="modal-close" id="confirmClose">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M5 5l14 14M19 5L5 19" stroke="#20242A" stroke-width="2" stroke-linecap="round"/></svg>
+    </button>
+    <div class="confirm-title">Preview của bạn đã sẵn sàng</div>
+    <div class="confirm-sub">Kiểm tra kỹ trước khi xác nhận — bạn có thể tạo lại nếu chưa ưng ý.</div>
+    <div class="confirm-preview" id="confirmPreview"></div>
+    <div class="history-row" id="historyRow"></div>
+    <div class="confirm-actions">
+      <button class="btn-regen" id="regenBtn">Tạo lại</button>
+      <button class="btn-confirm" id="confirmBtn">Xác nhận lựa chọn</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="/config.js"></script>
+<script>
+/* ---------- Simple chibi SVG generator (placeholder for AI output) ---------- */
+function chibiSVG(hair, outfit){
+  return `
+  <svg viewBox="0 0 120 140" xmlns="http://www.w3.org/2000/svg">
+    <ellipse cx="60" cy="128" rx="26" ry="6" fill="#00000014"/>
+    <path d="M40 78 Q60 66 80 78 L84 132 Q60 140 36 132 Z" fill="${outfit}"/>
+    <circle cx="60" cy="50" r="30" fill="#F4C9A0"/>
+    <path d="M30 46 Q30 12 60 12 Q90 12 90 46 Q90 30 60 30 Q30 30 30 46Z" fill="${hair}"/>
+    <path d="M30 42 Q26 70 34 78 Q28 60 34 44Z" fill="${hair}"/>
+    <path d="M90 42 Q94 70 86 78 Q92 60 86 44Z" fill="${hair}"/>
+    <circle cx="48" cy="52" r="3.4" fill="#20242A"/>
+    <circle cx="72" cy="52" r="3.4" fill="#20242A"/>
+    <path d="M52 64 Q60 69 68 64" stroke="#C97B5F" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+    <ellipse cx="42" cy="60" rx="5" ry="3" fill="#F2A6A0" opacity="0.6"/>
+    <ellipse cx="78" cy="60" rx="5" ry="3" fill="#F2A6A0" opacity="0.6"/>
+  </svg>`;
+}
+const palettes = [
+  {hair:"#3B2B24", outfit:"#1F5C4E"},
+  {hair:"#5C3A21", outfit:"#C77B4B"},
+  {hair:"#20242A", outfit:"#8B4A6B"},
+  {hair:"#7A4A2A", outfit:"#4A5FA0"},
+];
+let currentPalette = palettes[0];
+
+/* ---------- Gallery ---------- */
+const galleryMain = document.getElementById('galleryMain');
+const galleryThumbs = document.getElementById('galleryThumbs');
+function renderGallery(){
+  galleryMain.innerHTML = chibiSVG(currentPalette.hair, currentPalette.outfit);
+  galleryThumbs.innerHTML = palettes.map((p,i)=>`
+    <div class="thumb ${p===currentPalette?'active':''}" data-i="${i}">${chibiSVG(p.hair,p.outfit)}</div>
+  `).join('');
+  galleryThumbs.querySelectorAll('.thumb').forEach(el=>{
+    el.onclick = ()=>{ currentPalette = palettes[el.dataset.i]; renderGallery(); };
+  });
+}
+renderGallery();
+
+/* ---------- Figure type ---------- */
+const types = [
+  {name:"1 Người", icon:`<svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="7" r="4" stroke="#20242A" stroke-width="1.6"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7" stroke="#20242A" stroke-width="1.6" stroke-linecap="round"/></svg>`},
+  {name:"1 Thú cưng", icon:`<svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="13" r="6" stroke="#20242A" stroke-width="1.6"/><path d="M7 9l-1.5-4M17 9l1.5-4" stroke="#20242A" stroke-width="1.6" stroke-linecap="round"/></svg>`},
+  {name:"2 Người", icon:`<svg viewBox="0 0 24 24" fill="none"><circle cx="8" cy="7" r="3.4" stroke="#20242A" stroke-width="1.6"/><circle cx="16" cy="7" r="3.4" stroke="#20242A" stroke-width="1.6"/><path d="M2 21c0-3.8 2.8-6 6-6M22 21c0-3.8-2.8-6-6-6" stroke="#20242A" stroke-width="1.6" stroke-linecap="round"/></svg>`},
+  {name:"Cặp đôi", icon:`<svg viewBox="0 0 24 24" fill="none"><path d="M12 20s-7-4.4-7-9.4A4.4 4.4 0 0112 8a4.4 4.4 0 017 2.6c0 5-7 9.4-7 9.4z" stroke="#20242A" stroke-width="1.6" stroke-linejoin="round"/></svg>`},
+  {name:"Người + Thú cưng", icon:`<svg viewBox="0 0 24 24" fill="none"><circle cx="9" cy="7" r="3.4" stroke="#20242A" stroke-width="1.6"/><circle cx="17" cy="14" r="3" stroke="#20242A" stroke-width="1.6"/><path d="M3 21c0-3.8 2.8-6 6-6" stroke="#20242A" stroke-width="1.6" stroke-linecap="round"/></svg>`},
+];
+let selectedType = 0;
+const typeGrid = document.getElementById('typeGrid');
+typeGrid.innerHTML = types.map((t,i)=>`
+  <div class="type-card ${i===0?'active':''}" data-i="${i}">${t.icon}<div class="lbl">${t.name}</div></div>
+`).join('');
+typeGrid.querySelectorAll('.type-card').forEach(el=>{
+  el.onclick = ()=>{
+    selectedType = +el.dataset.i;
+    typeGrid.querySelectorAll('.type-card').forEach(c=>c.classList.remove('active'));
+    el.classList.add('active');
+    document.getElementById('typeVal').textContent = types[selectedType].name;
+  };
+});
+
+/* ---------- Size ---------- */
+const sizes = ["6cm","8cm","10cm"];
+const sizeRow = document.getElementById('sizeRow');
+sizeRow.innerHTML = sizes.map((s,i)=>`<div class="pill ${i===0?'active':''}" data-i="${i}">${s}</div>`).join('');
+sizeRow.querySelectorAll('.pill').forEach(el=>{
+  el.onclick = ()=>{
+    sizeRow.querySelectorAll('.pill').forEach(c=>c.classList.remove('active'));
+    el.classList.add('active');
+    document.getElementById('sizeVal').textContent = sizes[+el.dataset.i];
+  };
+});
+
+/* ---------- Style ---------- */
+const styles = [
+  {name:"Chibi", cls:"chibi", icon:chibiSVG("#3B2B24","#1F5C4E")},
+  {name:"Ghibli", cls:"ghibli", icon:chibiSVG("#5C3A21","#7B9E6E")},
+  {name:"Pixar", cls:"pixar", icon:chibiSVG("#20242A","#4A5FA0")},
+];
+const styleRow = document.getElementById('styleRow');
+styleRow.innerHTML = styles.map((s,i)=>`
+  <div class="style-card ${i===0?'active':''}" data-i="${i}">
+    <div class="style-swatch ${s.cls}">${s.icon}</div>
+    <div class="style-name">${s.name}</div>
+  </div>
+`).join('');
+styleRow.querySelectorAll('.style-card').forEach(el=>{
+  el.onclick = ()=>{
+    styleRow.querySelectorAll('.style-card').forEach(c=>c.classList.remove('active'));
+    el.classList.add('active');
+    document.getElementById('styleVal').textContent = styles[+el.dataset.i].name;
+  };
+});
+
+/* ---------- Upload ---------- */
+const uploadBox = document.getElementById('uploadBox');
+const photoInput = document.getElementById('photoInput');
+const uploadPreviewImg = document.getElementById('uploadPreviewImg');
+const generateBtn = document.getElementById('generateBtn');
+let fileChosen = false;
+let generatedImage = null;
+
+function setFileSelection(file) {
+  if (!file) return;
+
+  if (!file.type.startsWith('image/')) {
+    showToast('Vui lòng chọn file ảnh hợp lệ');
+    photoInput.value = '';
+    uploadBox.classList.remove('has-image');
+    uploadPreviewImg.src = '';
+    return;
+  }
+
+  const maxSize = 10 * 1024 * 1024;
+  if (file.size > maxSize) {
+    showToast('Ảnh vượt quá 10MB. Vui lòng chọn ảnh nhỏ hơn');
+    photoInput.value = '';
+    uploadBox.classList.remove('has-image');
+    uploadPreviewImg.src = '';
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = (event) => {
+    uploadPreviewImg.src = event.target.result;
+    uploadBox.classList.add('has-image');
+    uploadBox.classList.add('has-file');
+    generateBtn.disabled = false;
+    fileChosen = true;
+  };
+  reader.readAsDataURL(file);
+}
+
+uploadBox.onclick = ()=> photoInput.click();
+uploadBox.onkeydown = (event)=>{
+  if (event.key === 'Enter' || event.key === ' '){
+    event.preventDefault();
+    photoInput.click();
+  }
+};
+photoInput.onchange = (event)=>{
+  const selectedFile = event.target.files && event.target.files[0];
+  setFileSelection(selectedFile);
+};
+
+/* ---------- Generate flow ---------- */
+const progressOverlay = document.getElementById('progressOverlay');
+const confirmOverlay = document.getElementById('confirmOverlay');
+const barFill = document.getElementById('barFill');
+const barPct = document.getElementById('barPct');
+const progressStatus = document.getElementById('progressStatus');
+const confirmPreview = document.getElementById('confirmPreview');
+const historyRow = document.getElementById('historyRow');
+const toast = document.getElementById('toast');
+
+const statusSteps = ["Đang đọc ảnh…","Đang tạo hình khối…","Đang lên màu phong cách…","Hoàn thiện chi tiết…"];
+let genHistory = [];
+
+function showToast(msg){
+  toast.textContent = msg;
+  toast.classList.add('show');
+  setTimeout(()=>toast.classList.remove('show'), 2200);
+}
+
+async function runGeneration(){
+  if (!photoInput.files[0]) return;
+
+  progressOverlay.classList.add('show');
+  let pct = 8;
+  barFill.style.width = "0%";
+  barPct.textContent = "0%";
+  progressStatus.textContent = statusSteps[0];
+  const progressTimer = setInterval(()=>{
+    pct = Math.min(pct + 5, 88);
+    barFill.style.width = pct + "%";
+    barPct.textContent = Math.round(pct) + "%";
+    const stepIdx = Math.min(statusSteps.length-1, Math.floor((pct/100)*statusSteps.length));
+    progressStatus.textContent = statusSteps[stepIdx];
+  }, 500);
+
+  try {
+    const formData = new FormData();
+    formData.append('image', photoInput.files[0]);
+    formData.append('style', document.getElementById('styleVal').textContent.toLowerCase());
+
+    const configuredApiUrl = window.FIGURE_CONFIG?.apiBaseUrl || window.location.origin;
+    const apiBaseUrl = configuredApiUrl.replace(/\/$/, '');
+    const response = await fetch(`${apiBaseUrl}/api/preview`, {
+      method: 'POST',
+      body: formData,
+    });
+    const result = await response.json();
+    if (!response.ok || !result.success) {
+      throw new Error(result.message || 'Không thể tạo preview bằng Gemini');
+    }
+
+    generatedImage = result.generatedImage;
+    clearInterval(progressTimer);
+    barFill.style.width = "100%";
+    barPct.textContent = "100%";
+    progressStatus.textContent = statusSteps[statusSteps.length - 1];
+    setTimeout(()=>{
+      progressOverlay.classList.remove('show');
+      openConfirm();
+    }, 350);
+  } catch (error) {
+    clearInterval(progressTimer);
+    progressOverlay.classList.remove('show');
+    showToast(error.message || 'Không thể kết nối tới API');
+  }
+}
+
+function openConfirm(){
+  const p = palettes[Math.floor(Math.random()*palettes.length)];
+  currentPalette = p;
+  genHistory.unshift(p);
+  if(genHistory.length > 4) genHistory.pop();
+  renderConfirm();
+  confirmOverlay.classList.add('show');
+}
+
+function renderConfirm(){
+  confirmPreview.innerHTML = generatedImage
+    ? `<img src="${generatedImage}" alt="Preview figure được tạo bằng Gemini">`
+    : chibiSVG(currentPalette.hair, currentPalette.outfit);
+  historyRow.innerHTML = genHistory.map((p,i)=>`
+    <div class="history-thumb ${p===currentPalette?'active':''}" data-i="${i}">${chibiSVG(p.hair,p.outfit)}</div>
+  `).join('');
+  historyRow.querySelectorAll('.history-thumb').forEach(el=>{
+    el.onclick = ()=>{ currentPalette = genHistory[el.dataset.i]; renderConfirm(); };
+  });
+}
+
+generateBtn.onclick = ()=>{
+  if(!fileChosen) return;
+  runGeneration();
+};
+
+document.getElementById('regenBtn').onclick = ()=>{
+  confirmOverlay.classList.remove('show');
+  runGeneration();
+};
+
+document.getElementById('confirmBtn').onclick = ()=>{
+  confirmOverlay.classList.remove('show');
+  renderGallery();
+  document.getElementById('addCartBtn').disabled = false;
+  document.getElementById('buyNowBtn').disabled = false;
+  showToast("Đã lưu preview vào lựa chọn của bạn");
+};
+
+document.getElementById('confirmClose').onclick = ()=>{
+  confirmOverlay.classList.remove('show');
+};
+
+document.getElementById('addCartBtn').onclick = ()=> showToast("Đã thêm vào giỏ hàng");
+document.getElementById('buyNowBtn').onclick = ()=> showToast("Chuyển tới thanh toán…");
+</script>
+</body>
+</html>
