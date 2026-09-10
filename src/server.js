@@ -36,6 +36,15 @@ app.get('/api/health', (req, res) => {
   res.json({ ok: true, message: 'Figure AI API is running' });
 });
 
+app.get('/config.js', (req, res) => {
+  res.type('application/javascript');
+  res.send(`window.FIGURE_CONFIG = ${JSON.stringify({ apiBaseUrl: config.apiBaseUrl })};`);
+});
+
+app.get('/', (req, res) => {
+  res.sendFile(path.join(process.cwd(), 'index.html'));
+});
+
 app.use('/api', uploadRoutes);
 
 app.use((err, req, res, next) => {

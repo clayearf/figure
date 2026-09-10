@@ -305,6 +305,7 @@
 
 <div class="toast" id="toast"></div>
 
+<script src="/config.js"></script>
 <script>
 /* ---------- Simple chibi SVG generator (placeholder for AI output) ---------- */
 function chibiSVG(hair, outfit){
@@ -491,7 +492,9 @@ async function runGeneration(){
     formData.append('image', photoInput.files[0]);
     formData.append('style', document.getElementById('styleVal').textContent.toLowerCase());
 
-    const response = await fetch('http://localhost:4000/api/preview', {
+    const configuredApiUrl = window.FIGURE_CONFIG?.apiBaseUrl || 'http://localhost:4000';
+    const apiBaseUrl = configuredApiUrl.replace(/\/$/, '');
+    const response = await fetch(`${apiBaseUrl}/api/preview`, {
       method: 'POST',
       body: formData,
     });
