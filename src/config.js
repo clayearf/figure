@@ -2,7 +2,7 @@ require('dotenv').config();
 
 const config = {
   port: Number(process.env.PORT || 4000),
-  apiBaseUrl: process.env.API_BASE_URL || '',
+  apiBaseUrl: process.env.VERCEL ? '' : (process.env.API_BASE_URL || ''),
   geminiApiKey: process.env.GEMINI_API_KEY || '',
   geminiModel: process.env.GEMINI_MODEL || 'gemini-2.5-flash-image',
   uploadDir: process.env.UPLOAD_DIR || 'uploads',

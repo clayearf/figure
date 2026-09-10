@@ -492,7 +492,7 @@ async function runGeneration(){
     formData.append('image', photoInput.files[0]);
     formData.append('style', document.getElementById('styleVal').textContent.toLowerCase());
 
-    const configuredApiUrl = window.FIGURE_CONFIG?.apiBaseUrl || 'http://localhost:4000';
+    const configuredApiUrl = window.FIGURE_CONFIG?.apiBaseUrl || window.location.origin;
     const apiBaseUrl = configuredApiUrl.replace(/\/$/, '');
     const response = await fetch(`${apiBaseUrl}/api/preview`, {
       method: 'POST',
