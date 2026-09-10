@@ -491,7 +491,7 @@ async function runGeneration(){
     formData.append('image', photoInput.files[0]);
     formData.append('style', document.getElementById('styleVal').textContent.toLowerCase());
 
-    const response = await fetch('http://localhost:4000/api/preview', {
+    const response = await fetch('https://figure-cyan.vercel.app/api/preview', {
       method: 'POST',
       body: formData,
     });
