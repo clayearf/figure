@@ -35,7 +35,7 @@ async function generateFigureFromImage({ imageBuffer, mimeType, style, prompt })
   const finalPrompt = makeStylePrompt(style, prompt);
 
   const response = await ai.models.generateContent({
-    model: 'gemini-2.0-flash-preview-image-generation',
+    model: config.geminiModel,
     contents: [
       {
         role: 'user',
